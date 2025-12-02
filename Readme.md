@@ -45,7 +45,8 @@ This application follows a **3-tier architecture** with complete separation of c
 
 ```
 todo-app/
-├── frontend/                 # Tier 1: Frontend Layer
+├── frontend/                # Tier 1: Frontend Layer
+│   ├── README.md            # Detailed frontend docs
 │   ├── Dockerfile           # Multi-stage build with Node + Nginx
 │   ├── package.json         # React dependencies
 │   ├── vite.config.js       # Vite bundler configuration
@@ -56,7 +57,8 @@ todo-app/
 │       ├── App.jsx          # Main React component
 │       └── styles.css       # Application styles
 │
-├── backend/                  # Tier 2: Backend Layer
+├── backend/                 # Tier 2: Backend Layer
+│   ├── README.md            # Detailed backend docs
 │   ├── Dockerfile           # Node.js Alpine container
 │   ├── package.json         # Express, Mongoose dependencies
 │   ├── server.js            # Express API server
@@ -504,5 +506,6 @@ Created for DevOps demonstrations and learning purposes.
 - [Docker Compose Reference](https://docs.docker.com/compose/)
 
 ---
+
 
 **⭐ Star this repository if you found it helpful!**
