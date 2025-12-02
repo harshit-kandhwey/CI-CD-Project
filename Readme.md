@@ -64,7 +64,7 @@ todo-app/
 │   ├── server.js            # Express API server
 │   └── .env                 # Environment variables
 │
-├── database/                 # Tier 3: Database Layer
+├── database/                # Tier 3: Database Layer
 │   ├── init-db.js           # MongoDB initialization script
 │   ├── backup.sh            # Database backup script
 │   ├── restore.sh           # Database restore script
@@ -509,3 +509,4 @@ Created for DevOps demonstrations and learning purposes.
 
 
 **⭐ Star this repository if you found it helpful!**
+
