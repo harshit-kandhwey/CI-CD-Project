@@ -1,78 +1,111 @@
-# 📝 3-Tier To-Do Application
+# 📝 3-Tier To-Do Application with AWS Deployment
 
-A professional, full-stack To-Do application built with a microservices architecture using Docker containers. Perfect for DevOps demonstrations, showcasing container orchestration, persistent storage, and multi-tier application deployment.
+A professional, full-stack To-Do application built with a microservices architecture using Docker containers, complete with Infrastructure as Code (IaC) using Terraform and automated CI/CD pipeline via GitHub Actions for AWS deployment.
 
 ![Architecture](https://img.shields.io/badge/Architecture-3--Tier-blue)
 ![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker)
 ![React](https://img.shields.io/badge/React-18-61DAFB?logo=react)
 ![Node.js](https://img.shields.io/badge/Node.js-18-339933?logo=node.js)
 ![MongoDB](https://img.shields.io/badge/MongoDB-7.0-47A248?logo=mongodb)
+![Terraform](https://img.shields.io/badge/Terraform-IaC-7B42BC?logo=terraform)
+![AWS](https://img.shields.io/badge/AWS-Cloud-FF9900?logo=amazon-aws)
+![GitHub Actions](https://img.shields.io/badge/GitHub-Actions-2088FF?logo=github-actions)
 
-## 🏗️ Architecture
-
-This application follows a **3-tier architecture** with complete separation of concerns:
-
-```
-┌─────────────────────────────────────────────────────────────┐
-│                         CLIENT                              │
-│                    (Web Browser)                            │
-└────────────────────────┬────────────────────────────────────┘
-                         │ HTTP (Port 80)
-                         ▼
-┌─────────────────────────────────────────────────────────────┐
-│                   TIER 1: FRONTEND                          │
-│              React + Nginx Container                        │
-│                    (todo-frontend)                          │
-└────────────────────────┬────────────────────────────────────┘
-                         │ REST API (Port 5000)
-                         ▼
-┌─────────────────────────────────────────────────────────────┐
-│                   TIER 2: BACKEND                           │
-│            Node.js + Express Container                      │
-│                   (todo-backend)                            │
-└────────────────────────┬────────────────────────────────────┘
-                         │ MongoDB Protocol (Port 27017)
-                         ▼
-┌─────────────────────────────────────────────────────────────┐
-│                   TIER 3: DATABASE                          │
-│               MongoDB Container                             │
-│                  (todo-database)                            │
-│            Volume: todo-app-data                            │
-└─────────────────────────────────────────────────────────────┘
-```
-
-## 📁 Project Structure
+## 🏗️ Complete Architecture
 
 ```
-todo-app/
-├── frontend/                 # Tier 1: Frontend Layer
-│   ├── Dockerfile           # Multi-stage build with Node + Nginx
-│   ├── package.json         # React dependencies
-│   ├── vite.config.js       # Vite bundler configuration
-│   ├── nginx.conf           # Nginx server configuration
-│   ├── index.html           # HTML entry point
-│   ├── main.jsx             # React entry point
-│   ├── App.jsx              # Main React component
-│   └── styles.css           # Application styles
+┌─────────────────────────────────────────────────────────────────┐
+│                      DEVELOPER WORKFLOW                         │
+│                                                                 │
+│  Developer → Git Push → GitHub → GitHub Actions → AWS EC2       │
+└─────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────┐
+│                         AWS CLOUD (VPC)                         │
+│                                                                 │
+│  ┌────────────────────────────────────────────────────────┐     │
+│  │              EC2 Instance (Ubuntu 22.04)               │     │
+│  │                                                        │     │
+│  │  ┌──────────────────────────────────────────────────┐  │     │
+│  │  │           Docker Compose Environment             │  │     │
+│  │  │                                                  │  │     │
+│  │  │  ┌────────────┐  ┌────────────┐  ┌───────────┐   │  │     │
+│  │  │  │  Frontend  │  │  Backend   │  │ Database  │   │  │     │
+│  │  │  │   Nginx    │→ │  Node.js   │→ │  MongoDB  │   │  │     │
+│  │  │  │  Port 80   │  │  Port 5000 │  │Port 27017 │   │  │     │
+│  │  │  └────────────┘  └────────────┘  └───────────┘   │  │     │
+│  │  └──────────────────────────────────────────────────┘  │     │
+│  └────────────────────────────────────────────────────────┘     │
+│                              ↕                                  │
+│  ┌────────────────────────────────────────────────────────┐     │
+│  │           Security Group (Firewall Rules)              │     │
+│  │  • Port 22 (SSH)  • Port 80 (HTTP)  • Port 5000 (API)  │     │
+│  └────────────────────────────────────────────────────────┘     │
+│                              ↕                                  │
+│  ┌────────────────────────────────────────────────────────┐     │
+│  │              Internet Gateway (IGW)                    │     │
+│  └────────────────────────────────────────────────────────┘     │
+└─────────────────────────────────────────────────────────────────┘
+                              ↕
+┌─────────────────────────────────────────────────────────────────┐
+│                         PUBLIC INTERNET                         │
+│                      Users Access Application                   │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+## 📁 Complete Project Structure
+
+```
+CI-CD-Project/
+├── frontend/                    # Tier 1: Presentation Layer
+│   ├── .dockerignore
+│   ├── Dockerfile              # Multi-stage: Build + Nginx
+│   ├── package.json
+│   ├── vite.config.js
+│   ├── nginx.conf              # Reverse proxy configuration
+│   ├── index.html
+│   ├── main.jsx
+│   ├── App.jsx
+│   ├── styles.css
+│   └── README.md
 │
-├── backend/                  # Tier 2: Backend Layer
-│   ├── Dockerfile           # Node.js Alpine container
-│   ├── package.json         # Express, Mongoose dependencies
-│   ├── server.js            # Express API server
-│   └── .env                 # Environment variables
+├── backend/                     # Tier 2: Business Logic Layer
+│   ├── Dockerfile
+│   ├── package.json
+│   ├── server.js               # Express REST API
+│   ├── .env                    # Environment variables
+│   └── README.md
 │
-├── database/                 # Tier 3: Database Layer
-│   ├── init-db.js           # MongoDB initialization script
-│   ├── backup.sh            # Database backup script
-│   ├── restore.sh           # Database restore script
-│   ├── mongod.conf          # MongoDB configuration (optional)
-│   └── README.md            # Database documentation
+├── database/                    # Tier 3: Data Layer
+│   ├── init-db.js              # MongoDB initialization
+│   ├── backup.sh               # Backup script
+│   ├── restore.sh              # Restore script
+│   ├── mongod.conf             # MongoDB configuration
+│   └── README.md
 │
-├── docker-compose.yml        # Container orchestration
-└── README.md                 # This file
+├── terraform/                   # Infrastructure as Code (NEW!)
+│   ├── .gitignore
+│   ├── main.tf                 # VPC, EC2, Security Groups, IAM
+│   ├── variables.tf            # Configurable parameters
+│   ├── outputs.tf              # Infrastructure outputs
+│   ├── user-data.sh            # EC2 bootstrap script
+│   ├── terraform.tfvars.example
+│   └── README.md
+│
+├── .github/                     # CI/CD Pipeline (NEW!)
+│   └── workflows/
+│       └── deploy.yml          # Automated deployment workflow
+│
+├── docker-compose.yml           # Local development orchestration
+├── README.md                    # This file
+├── AWS-SETUP-GUIDE.md          # Complete AWS deployment guide
+├── SETUP-CHECKLIST.md          # Local setup verification
+├── PROJECT-SUMMARY.md          # Architecture documentation
+├── verify-structure.sh         # Linux/Mac file verification
+└── verify-structure.ps1        # Windows file verification
 ```
 
-## ✨ Features
+## ✨ Key Features
 
 ### 🎨 Frontend (React + Nginx)
 
@@ -100,81 +133,112 @@ todo-app/
 - ✅ Backup and restore scripts included
 - ✅ Data survives container restarts
 
-## 🚀 Quick Start
+### ☁️ AWS Infrastructure (Terraform)
 
-### Prerequisites
+- ✅ Complete VPC with public subnet
+- ✅ EC2 instance (t3.micro - free tier eligible)
+- ✅ Security Groups with minimal access
+- ✅ Elastic IP for static public access
+- ✅ IAM roles and policies
+- ✅ Automated Docker and Git installation
+- ✅ Cost-optimized (~$0-10/month)
 
-- Docker (20.10+)
-- Docker Compose (2.0+)
-- Git
+### 🔄 CI/CD Pipeline (GitHub Actions)
 
-### Installation
+- ✅ Automated deployment on git push
+- ✅ Zero-downtime updates
+- ✅ Automatic rollback on failure
+- ✅ Health checks after deployment
+- ✅ SSH-based secure deployment
+- ✅ Secret management via GitHub Secrets
 
-1. **Clone the repository**
+## 🚀 Quick Start Options
 
-   ```bash
-   git clone <your-repo-url>
-   cd todo-app
-   ```
-
-2. **Build and start all containers**
-
-   ```bash
-   docker-compose up --build
-   ```
-
-3. **Access the application**
-
-   - **Frontend**: http://localhost
-   - **Backend API**: http://localhost:5000/api
-   - **Health Check**: http://localhost:5000/api/health
-
-4. **Stop the application**
-
-   ```bash
-   docker-compose down
-   ```
-
-5. **Stop and remove all data**
-   ```bash
-   docker-compose down -v
-   ```
-
-## 🔧 Development
-
-### Run in Development Mode
-
-**Frontend Development:**
+### Option 1: Local Development (Fastest)
 
 ```bash
-cd frontend
-npm install
-npm run dev
-# Access at http://localhost:3000
+# 1. Clone repository
+git clone https://github.com/YOUR_USERNAME/CI-CD-Project.git
+cd CI-CD-Project
+
+# 2. Verify file structure
+./verify-structure.sh      # Linux/Mac
+.\verify-structure.ps1     # Windows
+
+# 3. Start all services
+docker-compose up --build
+
+# 4. Access application
+# Frontend: http://localhost
+# Backend: http://localhost:5000/api
+# Health: http://localhost:5000/api/health
 ```
 
-**Backend Development:**
+### Option 2: AWS Deployment (Production)
+
+**Prerequisites:**
+
+- AWS Account
+- Terraform installed
+- AWS CLI configured
+- SSH key pair generated
+
+**Quick Deploy:**
 
 ```bash
-cd backend
-npm install
-npm run dev
-# API runs at http://localhost:5000
+# 1. Configure Terraform
+cd terraform
+cp terraform.tfvars.example terraform.tfvars
+# Edit terraform.tfvars with your values
+
+# 2. Deploy infrastructure
+terraform init
+terraform apply
+
+# 3. Wait for user-data (5-10 min) & deploy app manually
+# See POST-TERRAFORM-DEPLOYMENT.md for complete steps
+
+# 4. Configure GitHub Actions secrets
+# Then future deployments are automatic!
 ```
 
-### Environment Variables
+**📖 Critical:** After `terraform apply`, you MUST follow [POST-TERRAFORM-DEPLOYMENT.md](POST-TERRAFORM-DEPLOYMENT.md) for:
 
-**Backend (.env):**
+- Manual first deployment on EC2
+- GitHub Actions configuration
+- Automated deployment setup
 
-```env
-PORT=5000
-MONGODB_URI=mongodb://database:27017/todoapp
-```
+**Detailed Guides:**
 
-**Frontend:**
+- [AWS-SETUP-GUIDE.md](AWS-SETUP-GUIDE.md) - Complete AWS setup
+- [POST-TERRAFORM-DEPLOYMENT.md](POST-TERRAFORM-DEPLOYMENT.md) - Post-Terraform steps
+- [DEPLOYMENT-WORKFLOW.md](DEPLOYMENT-WORKFLOW.md) - Visual workflow
 
-```env
-VITE_API_URL=http://localhost/api
+### Option 3: Automated CI/CD (Recommended)
+
+```bash
+# 1. Deploy infrastructure with Terraform (one-time)
+cd terraform
+terraform apply
+
+# 2. Configure GitHub Secrets
+# Add to GitHub → Settings → Secrets:
+# - AWS_ACCESS_KEY_ID
+# - AWS_SECRET_ACCESS_KEY
+# - EC2_HOST
+# - EC2_SSH_PRIVATE_KEY
+# - GITHUB_REPO
+
+# 3. Push code to deploy automatically
+git add .
+git commit -m "Deploy to AWS"
+git push origin main
+
+# GitHub Actions will automatically:
+# - Clone repo to EC2
+# - Build Docker images
+# - Start containers
+# - Verify deployment
 ```
 
 ## 📡 API Endpoints
@@ -187,74 +251,148 @@ VITE_API_URL=http://localhost/api
 | PUT    | `/api/todos/:id` | Update a todo         |
 | DELETE | `/api/todos/:id` | Delete a todo         |
 
-### Example API Requests
-
-**Create a Todo:**
+### Example API Usage
 
 ```bash
+# Health Check
+curl http://localhost:5000/api/health
+
+# Get All Todos
+curl http://localhost:5000/api/todos
+
+# Create Todo
 curl -X POST http://localhost:5000/api/todos \
   -H "Content-Type: application/json" \
   -d '{"text":"Buy groceries"}'
-```
 
-**Get All Todos:**
-
-```bash
-curl http://localhost:5000/api/todos
-```
-
-**Update a Todo:**
-
-```bash
-curl -X PUT http://localhost:5000/api/todos/<todo-id> \
+# Update Todo
+curl -X PUT http://localhost:5000/api/todos/ \
   -H "Content-Type: application/json" \
   -d '{"completed":true}'
-```
 
-**Delete a Todo:**
-
-```bash
-curl -X DELETE http://localhost:5000/api/todos/<todo-id>
+# Delete Todo
+curl -X DELETE http://localhost:5000/api/todos/
 ```
 
 ## 🐳 Docker Commands
 
-### Container Management
+### Local Development
 
 ```bash
-# View running containers
-docker-compose ps
+# Start all containers
+docker-compose up -d --build
 
 # View logs
 docker-compose logs -f
 
-# View logs for specific service
-docker-compose logs -f backend
-
-# Restart a service
-docker-compose restart backend
-
-# Rebuild a specific service
-docker-compose up -d --build frontend
-
-# Stop all containers
+# Stop containers
 docker-compose down
 
-# Remove all containers, networks, and volumes
+# Stop and remove volumes (deletes data)
 docker-compose down -v
+
+# Rebuild specific service
+docker-compose up -d --build frontend
+
+# Check container status
+docker-compose ps
+
+# Execute commands in container
+docker exec -it todo-backend sh
 ```
 
-### Individual Container Commands
+### Individual Containers
 
 ```bash
-# Build frontend only
+# Build individual services
 docker build -t todo-frontend ./frontend
-
-# Build backend only
 docker build -t todo-backend ./backend
 
-# Run database only
+# Run standalone database
 docker run -d -p 27017:27017 -v todo-data:/data/db mongo:7.0
+```
+
+## ☁️ Terraform Infrastructure Management
+
+### Deploy Infrastructure
+
+```bash
+cd terraform
+
+# Initialize Terraform
+terraform init
+
+# Preview changes
+terraform plan
+
+# Apply changes
+terraform apply
+
+# View outputs
+terraform output
+
+# Destroy infrastructure
+terraform destroy
+```
+
+### Get Infrastructure Info
+
+```bash
+# Get EC2 public IP
+terraform output ec2_public_ip
+
+# Get application URL
+terraform output application_url
+
+# Get SSH command
+terraform output ssh_command
+
+# View all outputs
+terraform output
+```
+
+### SSH into EC2
+
+```bash
+# Use output command
+ssh -i ~/.ssh/todo-app-key ubuntu@
+
+# Or get from Terraform
+ssh -i ~/.ssh/todo-app-key ubuntu@$(terraform output -raw ec2_public_ip)
+```
+
+## 💰 AWS Cost Breakdown
+
+### Free Tier (First 12 Months)
+
+| Resource         | Free Tier       | This Project  |
+| ---------------- | --------------- | ------------- |
+| EC2 t3.micro     | 750 hours/month | ✅ Used       |
+| EBS Storage      | 30 GB           | ✅ 20 GB used |
+| Data Transfer    | 15 GB/month out | ✅ Covered    |
+| VPC, Subnet, IGW | Free            | ✅ Free       |
+
+### After Free Tier
+
+| Resource              | Monthly Cost   |
+| --------------------- | -------------- |
+| EC2 t3.micro (24/7)   | $7.50          |
+| EBS 20GB gp3          | $1.60          |
+| Data Transfer         | ~$1.00         |
+| Elastic IP (attached) | $0.00          |
+| **Total**             | **~$10/month** |
+
+### Cost Optimization Tips
+
+```bash
+# Stop instance when not in use
+aws ec2 stop-instances --instance-ids $(terraform output -raw ec2_instance_id)
+
+# Start when needed
+aws ec2 start-instances --instance-ids $(terraform output -raw ec2_instance_id)
+
+# Or destroy completely
+terraform destroy
 ```
 
 ## 💾 Database Management
@@ -262,22 +400,22 @@ docker run -d -p 27017:27017 -v todo-data:/data/db mongo:7.0
 ### Backup Database
 
 ```bash
-# Make script executable (first time only)
+# Make script executable
 chmod +x database/backup.sh
 
 # Run backup
 ./database/backup.sh
-```
 
-Backups are stored in `./backups/` directory with timestamp.
+# Backups stored in: ./backups/
+```
 
 ### Restore Database
 
 ```bash
-# Make script executable (first time only)
+# Make script executable
 chmod +x database/restore.sh
 
-# List available backups
+# List backups
 ls -lh backups/
 
 # Restore from backup
@@ -287,101 +425,116 @@ ls -lh backups/
 ### Access MongoDB Shell
 
 ```bash
-# Connect to MongoDB shell
+# Local
 docker exec -it todo-database mongosh
 
-# Use the todoapp database
+# On EC2
+ssh -i ~/.ssh/todo-app-key ubuntu@
+docker exec -it todo-database mongosh
+
+# Use database
 use todoapp
 
-# View all todos
+# View todos
 db.todos.find().pretty()
-
-# Count todos
-db.todos.countDocuments()
-
-# Clear all todos
-db.todos.deleteMany({})
 ```
 
 ## 🔍 Monitoring & Debugging
 
-### Health Checks
+### Check Application Health
 
 ```bash
-# Check backend health
+# Local
 curl http://localhost:5000/api/health
+curl http://localhost
 
-# Check if all containers are healthy
-docker-compose ps
+# AWS
+curl http://:5000/api/health
+curl http://
 ```
 
 ### View Logs
 
 ```bash
-# All services
+# Local - All services
 docker-compose logs -f
 
-# Specific service
+# Local - Specific service
 docker-compose logs -f backend
-docker-compose logs -f frontend
-docker-compose logs -f database
 
-# Last 50 lines
-docker-compose logs --tail=50 backend
+# AWS - SSH and check logs
+ssh -i ~/.ssh/todo-app-key ubuntu@
+cd /home/ubuntu/app
+docker-compose logs -f
 ```
 
-### Inspect Containers
+### Check Infrastructure
 
 ```bash
-# Execute command in container
-docker exec -it todo-backend sh
+# Terraform state
+terraform show
 
-# View container details
-docker inspect todo-backend
+# AWS resources
+aws ec2 describe-instances
+aws ec2 describe-vpcs
+aws ec2 describe-security-groups
 
-# View network details
-docker network inspect todo-network
-
-# View volume details
-docker volume inspect todo-app-data
+# Container status (on EC2)
+docker compose ps
+docker stats
 ```
 
 ## 🧪 Testing
 
-### Manual Testing
-
-1. **Create a todo** - Add a new task
-2. **Mark as complete** - Click checkbox
-3. **Filter tasks** - Use All/Active/Completed filters
-4. **Delete todo** - Click trash icon
-5. **Restart containers** - Verify data persistence
-
-### API Testing with curl
+### Local Testing
 
 ```bash
-# Health check
-curl http://localhost:5000/api/health
+# Start application
+docker-compose up -d
 
-# Get all todos
-curl http://localhost:5000/api/todos
+# Run tests
+./verify-structure.sh  # Verify file structure
+curl http://localhost:5000/api/health  # Backend health
+curl http://localhost  # Frontend
 
-# Create todo
+# Create a todo
 curl -X POST http://localhost:5000/api/todos \
   -H "Content-Type: application/json" \
   -d '{"text":"Test todo"}'
+```
 
-# Update todo (replace <id> with actual ID)
-curl -X PUT http://localhost:5000/api/todos/<id> \
-  -H "Content-Type: application/json" \
-  -d '{"completed":true}'
+### AWS Testing
 
-# Delete todo
-curl -X DELETE http://localhost:5000/api/todos/<id>
+```bash
+# Get EC2 IP
+EC2_IP=$(cd terraform && terraform output -raw ec2_public_ip)
+
+# Test endpoints
+curl http://$EC2_IP:5000/api/health
+curl http://$EC2_IP
+
+# Test from browser
+echo "Visit: http://$EC2_IP"
+```
+
+### GitHub Actions Testing
+
+```bash
+# Trigger deployment
+git add .
+git commit -m "Test deployment"
+git push origin main
+
+# Watch workflow
+# GitHub → Actions tab
+
+# Verify deployment
+curl http://:5000/api/health
 ```
 
 ## 🛠️ Troubleshooting
 
-### Common Issues
+### Local Issues
 
 **Port already in use:**
 
@@ -389,106 +542,135 @@ curl -X DELETE http://localhost:5000/api/todos/<id>
 # Check what's using the port
 sudo lsof -i :80
 sudo lsof -i :5000
-sudo lsof -i :27017
 
-# Kill the process or change ports in docker-compose.yml
+# Stop conflicting services or change ports in docker-compose.yml
 ```
 
 **Container fails to start:**
 
 ```bash
 # Check logs
-docker-compose logs <service-name>
+docker-compose logs
 
 # Rebuild without cache
 docker-compose build --no-cache
 docker-compose up -d
 ```
 
-**Database connection fails:**
+### AWS Issues
+
+**Cannot SSH to EC2:**
 
 ```bash
-# Check if database is running
-docker-compose ps database
+# Check security group allows your IP
+curl ifconfig.me
 
-# Check database logs
-docker-compose logs database
+# Update terraform.tfvars
+ssh_allowed_ips = ["YOUR_IP/32"]
+terraform apply
 
-# Restart database
-docker-compose restart database
+# Verify SSH key permissions
+chmod 600 ~/.ssh/todo-app-key
 ```
 
-**Frontend can't connect to backend:**
+**Application not accessible:**
 
 ```bash
-# Check nginx configuration
-docker exec -it todo-frontend cat /etc/nginx/conf.d/default.conf
+# SSH into EC2
+ssh -i ~/.ssh/todo-app-key ubuntu@
 
-# Check backend is accessible
-curl http://localhost:5000/api/health
+# Check if Docker is installed
+docker --version
+
+# Check if containers are running
+docker compose ps
+
+# Check application logs
+docker compose logs
+
+# Verify user-data completed
+sudo cat /var/log/cloud-init-output.log
 ```
 
-**Data not persisting:**
+### GitHub Actions Issues
 
-```bash
-# Check volume exists
-docker volume ls | grep todo-app-data
+**Workflow fails:**
 
-# Inspect volume
-docker volume inspect todo-app-data
+1. Check all GitHub Secrets are set correctly
+2. Verify EC2_HOST is just the IP (no http://)
+3. Ensure SSH private key includes BEGIN/END lines
+4. Check EC2 instance is running
+5. View workflow logs in GitHub Actions tab
 
-# Don't use -v flag when stopping
-docker-compose down  # ✅ Keeps data
-docker-compose down -v  # ❌ Removes data
+## 📈 Scaling Guide
+
+### Vertical Scaling (Immediate)
+
+```hcl
+# In terraform/variables.tf
+variable "instance_type" {
+  default = "t3.small"  # or t3.medium
+}
+
+# Apply changes
+terraform apply
 ```
 
-## 📊 Performance Optimization
+### Horizontal Scaling (Future)
+
+Add these to your Terraform:
+
+- Application Load Balancer
+- Auto Scaling Group
+- Multiple EC2 instances
+- Managed MongoDB (DocumentDB)
+
+## 🔐 Security Best Practices
+
+### Current Security Features
+
+- ✅ VPC with isolated subnets
+- ✅ Security Groups with minimal ports
+- ✅ SSH restricted to specific IPs
+- ✅ IAM roles with least privilege
+- ✅ EBS encryption enabled
+- ✅ IMDSv2 required
+- ✅ Secrets managed via GitHub Secrets
 
 ### Production Recommendations
 
-1. **Enable MongoDB authentication**
-2. **Use environment-specific builds**
-3. **Implement rate limiting in backend**
-4. **Add Redis caching layer**
-5. **Use CDN for static assets**
-6. **Implement monitoring (Prometheus/Grafana)**
-7. **Add SSL/TLS certificates**
+- [ ] Add SSL/TLS with Let's Encrypt
+- [ ] Enable AWS WAF for DDoS protection
+- [ ] Use AWS Secrets Manager
+- [ ] Enable CloudWatch monitoring
+- [ ] Set up VPN or Bastion host
+- [ ] Implement rate limiting
+- [ ] Add authentication/authorization
 
-## 🔒 Security Considerations
+## 📚 Documentation
 
-- MongoDB runs without authentication (development only)
-- CORS is enabled for all origins (configure for production)
-- No rate limiting implemented (add for production)
-- Passwords should be stored in secrets (for production)
-- Use HTTPS in production
-- Implement input sanitization
-- Add authentication/authorization
+- **[README.md](README.md)** - This file (main documentation)
+- **[AWS-SETUP-GUIDE.md](AWS-SETUP-GUIDE.md)** - Complete AWS deployment guide
+- **[PROJECT-SUMMARY.md](PROJECT-SUMMARY.md)** - Architecture and technology overview
+- **[SETUP-CHECKLIST.md](SETUP-CHECKLIST.md)** - File structure verification
+- **[frontend/README.md](frontend/README.md)** - Frontend documentation
+- **[backend/README.md](backend/README.md)** - Backend API documentation
+- **[database/README.md](database/README.md)** - Database management guide
+- **[terraform/README.md](terraform/README.md)** - Infrastructure documentation
 
-## 📈 Scaling
+## 🎓 Learning Outcomes
 
-### Horizontal Scaling
+This project demonstrates:
 
-```yaml
-# Scale backend instances
-docker-compose up -d --scale backend=3
-# Add load balancer (nginx/traefik)
-# Configure sticky sessions for WebSocket support
-```
-
-### Vertical Scaling
-
-```yaml
-services:
-  backend:
-    deploy:
-      resources:
-        limits:
-          cpus: "2"
-          memory: 2G
-        reservations:
-          cpus: "1"
-          memory: 1G
-```
+- ✅ Full-stack web development (React, Node.js, MongoDB)
+- ✅ Docker containerization and orchestration
+- ✅ Infrastructure as Code with Terraform
+- ✅ AWS cloud services (VPC, EC2, IAM)
+- ✅ CI/CD pipelines with GitHub Actions
+- ✅ DevOps best practices
+- ✅ Cost optimization strategies
+- ✅ Security implementation
+- ✅ Documentation and maintenance
 
 ## 🤝 Contributing
 
@@ -502,26 +684,48 @@ services:
 
 This project is licensed under the MIT License - see the LICENSE file for details.
 
-## 👨‍💻 Author
-
-Created for DevOps demonstrations and learning purposes.
-
 ## 🙏 Acknowledgments
 
 - React team for the amazing frontend library
 - Express.js for the lightweight backend framework
 - MongoDB for the flexible NoSQL database
 - Docker for containerization technology
-- Nginx for high-performance web serving
+- Terraform for Infrastructure as Code
+- AWS for cloud infrastructure
+- GitHub Actions for CI/CD automation
 
-## 📚 Additional Resources
+## 📞 Support
 
-- [Docker Documentation](https://docs.docker.com/)
-- [React Documentation](https://react.dev/)
-- [Express.js Guide](https://expressjs.com/)
-- [MongoDB Manual](https://docs.mongodb.com/)
-- [Docker Compose Reference](https://docs.docker.com/compose/)
+- **Issues**: Report bugs via [GitHub Issues](https://github.com/YOUR_USERNAME/CI-CD-Project/issues)
+- **Discussions**: Ask questions in [GitHub Discussions](https://github.com/YOUR_USERNAME/CI-CD-Project/discussions)
+- **Documentation**: Check the docs folder for detailed guides
+
+## 🚀 Quick Reference
+
+```bash
+# Local Development
+docker-compose up --build                    # Start all services
+docker-compose down                          # Stop services
+
+# AWS Deployment
+cd terraform && terraform apply              # Deploy infrastructure
+terraform output application_url             # Get app URL
+terraform destroy                            # Remove all resources
+
+# CI/CD
+git push origin main                         # Auto-deploy via GitHub Actions
+
+# Monitoring
+docker-compose logs -f                       # View logs
+curl http://localhost:5000/api/health       # Health check
+
+# Database
+./database/backup.sh                         # Backup database
+./database/restore.sh          # Restore database
+```
 
 ---
 
 **⭐ Star this repository if you found it helpful!**
+
+**Built with ❤️ for learning DevOps, Cloud Computing, and Full-Stack Development**
